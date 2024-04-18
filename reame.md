@@ -18,5 +18,5 @@ I could see that they had a port for ssh connections and a service that I am not
 
 ![ssh-guest](/images/ssh-guest.png)
 
-This appeared to be a valid username for the port so I can try a couple of generic passwords to see if I can get signed in at all. I tried `password`, `guest`, and `guest123` before it kicked me out of the connection. Maybe we can try brute forcing some passwords using a simple dictionary but the delay between failed attempts and getting kicked after three successful tries would make that take a while so that may be something we come back to.
+This gave me a login attempt but we cannot be sure that's a valid user since the only way to know what users are on a system is by checking the passwd file which you must be logged into the system to see. If we are able to read this file at any point in our attack this could be useful to use but for now guessing random users and passwords is not a viable strategy.
 
