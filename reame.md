@@ -20,3 +20,5 @@ I could see that they had a port for ssh connections and a service that I am not
 
 This gave me a login attempt but we cannot be sure that's a valid user since the only way to know what users are on a system is by checking the passwd file which you must be logged into the system to see. If we are able to read this file at any point in our attack this could be useful to use but for now guessing random users and passwords is not a viable strategy.
 
+This lead me to turn my attention to the `upnp?` service which upon researching is `Universal Plug and Play`. 
+
