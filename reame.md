@@ -50,6 +50,12 @@ Not being able to find any devices on the upnp port, we then decided to try and 
 
 After inspecting the page using the dev tools, we found that a cookie is being used called `is_admin`. This is likely the path that we will want to follow to gain access to the machine.
 
+We also went ahead and scanned all the UDP ports as well since the TCP ports did not provide a whole lot of options. After completion of that scan using `sudo nmap -sV -sU {target_ip}`, we found the following open ports.
+
+![udp-scan](/images/udp-scan.png)
+
+The only service of interest to us here was the one on port 68. `DHCPC` has a known vulnerability when sending it a packet with a DNS option maliciously configured to trigger a buffer overflow as explained in [this](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/dhcp-client-remote-code-execution-vulnerability-demystified/#:~:text=A%20rogue%20DHCP%20server%20in%20the%20network%20can,the%20client%20and%20take%20control%20of%20the%20system.) article. However, we are not sure of the version of `DHCPC` being used here and would only want to come back here if the hosted web app on port `5000` leads us to a dead end. 
+
 ## Attacking The Machine
 
 ### Malicious User Input
