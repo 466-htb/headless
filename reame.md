@@ -2,7 +2,7 @@
 
 ## Setup
 
-We used a [kali-linux vm](https://www.kali.org/get-kali/#kali-virtual-machines) to attack this machine. After downloading the vpn to connect to, I ran the following command to connect and was able to establish a connection after testing with `ping`.
+We used a [kali-linux vm](https://www.kali.org/get-kali/#kali-virtual-machines) to attack this machine. After downloading the vpn to connect to, we ran the following command to connect and was able to establish a connection after testing with `ping`.
 
 `sudo openvpn ~/Downloads/lab_Deanathan.ovpn`
 
@@ -10,17 +10,17 @@ We used a [kali-linux vm](https://www.kali.org/get-kali/#kali-virtual-machines) 
 
 ### nmap Scan
 
-The first thing I did was run `sudo nmap -sV {target_ip}` to see what ports were being used and if any identifiable services could be found.
+The first thing we did was run `sudo nmap -sV {target_ip}` to see what ports were being used and if any identifiable services could be found.
 
 ![nmap-scan](/images/nmap-scan.png)
 
-I could see that they had a port for ssh connections and a service that I am not familiar with called `upnp?`. I am currently unsure if nmap is saying that the returned data shown is for that service or if it was for a service on a port not being displayed but I will try and see what kind of connections I can make to the ssh port. First I will need a username to use so I tried `guest`.
+We could see that they had a port for ssh connections and a service that we were not familiar with called `upnp?`. We are currently unsure if nmap is saying that the returned data shown is for that service or if it was for a service on a port not being displayed but we will try and see what kind of connections we can make to the ssh port. First we will need a username to use so we tried `guest`.
 
 ![ssh-guest](/images/ssh-guest.png)
 
-This gave me a login attempt but we cannot be sure that's a valid user since the only way to know what users are on a system is by checking the passwd file which you must be logged into the system to see. If we are able to read this file at any point in our attack this could be useful to use but for now guessing random users and passwords is not a viable strategy.
+This gave us a login attempt but we cannot be sure that's a valid user since the only way to know what users are on a system is by checking the passwd file which you must be logged into the system to see. If we are able to read this file at any point in our attack this could be useful to use but for now guessing random users and passwords is not a viable strategy.
 
-This lead me to turn my attention to the `upnp?` service which upon researching is `Universal Plug and Play`. This service seems like it may have some vulnerabilities that we can look into. Reading from [this](https://www.upguard.com/blog/what-is-upnp) source, it seems that `upnp` may be an avenue in which we can bypass firewall policies. I tried running this script but was unable to find any devices.
+This lead us to turn our attention to the `upnp?` service which upon researching is `Universal Plug and Play`. This service seems like it may have some vulnerabilities that we can look into. Reading from [this](https://www.upguard.com/blog/what-is-upnp) source, it seems that `upnp` may be an avenue in which we can bypass firewall policies. We tried running this script but were unable to find any devices.
 
 ```python
 import miniupnpc
@@ -44,11 +44,21 @@ for index, device in enumerate(devices):
 
 ```
 
-Not being able to find any devices on the upnp port, I then decided to try and visit that page in a web browser since it was returning html. That lead me to a webpage which with one button on it.
+Not being able to find any devices on the upnp port, we then decided to try and visit that page in a web browser since it was returning html. That lead us to a webpage which with one button on it.
 
 ![welcome](/images/welcome.png)
 
-After inspecting the page using the dev tools, I found that a cookie is being used called `is_admin`. This is likely the path that we will want to follow to gain access to the machine.
+After inspecting the page using the dev tools, we found that a cookie is being used called `is_admin`. This is likely the path that we will want to follow to gain access to the machine.
+
+## Attacking The Machine
+
+### Malicious User Input
+
+Clicking the only button on the page lead us to another page for contacting support. On this page was a form that we could submit to the server so perhaps some sort of injection could gain us access to the machine. 
+
+![form](/images/form.png)
+
+Submitting the form executes a POST request to `/support` so this is the initial destination of whatever malicious input we decide to submit.
 
 
 
