@@ -85,6 +85,22 @@ Connection: close
 fname=first&lname=last&email=a%40a.c&phone=1112223333&message=message
 ```
 
+Another piece of information we were able to gather is that the cookie's value is static, meaning that it does not change when getting a new one. This could lead to hints about how sessions are derived and be useful later on, but for now we are just taking note of it. Also, using `Burp's` built-in decoder, we were able to decode it from base 64 and found that it does include the string "user" meaning that we will need this to be an admin cookie at some point.
 
+![decoded-user-cookie](/images/decoded-user-cookie.png)
+
+### Injecting Malicious Input
+
+The first thing we tried was inputting `<script type=’text/javascript’>alert(‘test’);</script>` into the message box to see if that would yield any responses. It flagged the request as a hacking attempt which means that the server is likely doing some sanitization to avoid this from happening. We are also not 100% sure we should have seen an alert since we don't know how the message field is being handled. Hopefully the headless administrators are on vacation and we can continue to test before getting blacklisted :)
+
+![hacking-attempt](/images/hacking-attempt.png)
+
+Next we tried to url encode the string.
+
+```
+%3Cscript%20type%3D%E2%80%99text%2Fjavascript%E2%80%99%3Ealert%28%E2%80%98test%E2%80%99%29%3B%3C%2Fscript%3E
+```
+
+However this resulted in the same hacking detected attempt message. We could not find any source files in the dev tools so that means that the sanitization must be happening on the server. This is already more advanced than natas so we will have to find a more advanced way to inject code.
 
 
