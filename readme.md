@@ -58,13 +58,32 @@ The only service of interest to us here was the one on port 68. `DHCPC` has a kn
 
 ## Attacking The Machine
 
-### Malicious User Input
+### Identifying An Avenue
 
 Clicking the only button on the page lead us to another page for contacting support. On this page was a form that we could submit to the server so perhaps some sort of injection could gain us access to the machine. 
 
 ![form](/images/form.png)
 
-Submitting the form executes a POST request to `/support` so this is the initial destination of whatever malicious input we decide to submit.
+Submitting the form executes a POST request to `/support` so this is the initial destination of whatever malicious input we decide to submit. Since it seems that web requests will be heavily used, we utilized [`Burp Suite`](https://portswigger.net/burp/communitydownload), a tool that intercepts web requests and allows you to fully inspect and edit them before sending them to the server. This was a tool I picked up while doing natas and found it invaluable when working with web requests. We were able to fully capture the following request when submitting the form.
+
+```raw
+POST /support HTTP/1.1
+Host: 10.10.11.8:5000
+Content-Length: 69
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Origin: http://10.10.11.8:5000
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.122 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://10.10.11.8:5000/support
+Accept-Encoding: gzip, deflate, br
+Accept-Language: en-US,en;q=0.9
+Cookie: is_admin=InVzZXIi.uAlmXlTvm8vyihjNaPDWnvB_Zfs
+Connection: close
+
+fname=first&lname=last&email=a%40a.c&phone=1112223333&message=message
+```
 
 
 
