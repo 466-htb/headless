@@ -119,7 +119,7 @@ However this resulted in the same hacking detected attempt message. We could not
 
 One thing we tried was changing the bytes in the cookie to read `admin` instead of `user`, changing the cookie to `ImFkbWluIi64CWZeVO+by/KKGM1o8Nae8F9aZnM=`. We then realized we have no way of knowing if that worked right now but it might be good to hold onto that value for when we run into an admin page. It likely won't be valid since we would assume that the cookie is calculated in a more complex way, but it is worth trying. We then remembered that our [dirsearch](#dirsearch) yielded a route called `/dashboard` with a `401 unauthorized` return status. This means that this page would be what we want to target when we have the admin cookie. However, trying our tampered cookie on this route did not give us access.
 
-#### Elevating Privilege
+#### Stealing The Cookie
 
 Back to trying `XSS` attacks, one thing we could try is messing with the headers of the request. The only thing that we were able to recall from natas about vulnerable headers is that sometimes the developers will inherently trust the `User Agent` field of the request and use it in places that it should not. We also recall that it was being used whenever the server was logging a hacking attempt, just as headless seems to be doing here. So our plan of attack for this will be to trigger a hacking attempt and then get the server to possibly log the `User Agent` field which could trigger arbitrary code to fire.
 
@@ -194,7 +194,9 @@ If we do `ls ../` we see a `user.txt` which most likely contains the user flag.
 
 There it is! The user flag is `783df97f81a64da97716f2b28b22d6b6`. The root flag looks like it will require some extra steps since running `whoami` tells use we are logged in as `dvir` instead of `root` like we will need to be. Looks like having the admin cookie isn't enough to get root, we will have to once again find a way to elevate our authorization.
 
-#### Elevating Privilege ... Again
+#### Elevating Privilege
+
+One thing that will make our life so much easier is if we set up a reverse shell. I have never done this before so I watched [this]() YouTube video to learn how to do it with `ncat`.
 
 
 
