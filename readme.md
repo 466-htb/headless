@@ -163,6 +163,40 @@ Hitting the generate report button gave us a nice little message telling us that
 
 ### Stealing Flags
 
+Hitting the button sends the following request.
+
+```
+POST /dashboard HTTP/1.1
+Host: 10.10.11.8:5000
+Content-Length: 15
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Origin: http://10.10.11.8:5000
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.122 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://10.10.11.8:5000/dashboard
+Accept-Encoding: gzip, deflate, br
+Accept-Language: en-US,en;q=0.9
+Cookie: is_admin=ImFkbWluIg.dmzDkZNEm6CK0oyL1fbM-SnXpH0
+Connection: close
+
+date=2023-09-15
+```
+
+Right off the bat we can try injecting code into the request body to see if we get any kind of response. We will just try and insert the image that will ping our server first to see if that does anything. We never got a ping to our server so the input must be handled differently. We can try and just inject some bash commands to see if that does anything but there is no guarantee that we will see this output even if it does execute. To our surprise, running the request with an appended `ls` at the end actually returned the files in the directory to us!
+
+![ls](/images/ls.png)
+
+If we do `ls ../` we see a `user.txt` which most likely contains the user flag.
+
+![user-flag](/images/user-flag.png)
+
+There it is! The user flag is `783df97f81a64da97716f2b28b22d6b6`. The root flag looks like it will require some extra steps since running `whoami` tells use we are logged in as `dvir` instead of `root` like we will need to be. Looks like having the admin cookie isn't enough to get root, we will have to once again find a way to elevate our authorization.
+
+#### Elevating Privilege ... Again
+
+
 
 
 
