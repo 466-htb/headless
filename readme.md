@@ -56,6 +56,16 @@ We also went ahead and scanned all the UDP ports as well since the TCP ports did
 
 The only service of interest to us here was the one on port 68. `DHCPC` has a known vulnerability when sending it a packet with a DNS option maliciously configured to trigger a buffer overflow as explained in [this](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/dhcp-client-remote-code-execution-vulnerability-demystified/#:~:text=A%20rogue%20DHCP%20server%20in%20the%20network%20can,the%20client%20and%20take%20control%20of%20the%20system.) article. However, we are not sure of the version of `DHCPC` being used here and would only want to come back here if the hosted web app on port `5000` leads us to a dead end. 
 
+### dirsearch
+
+One useful tool when attacking a web server is `dirsearch`. This allows us to possibly see any other routes that may be accessible from the browser. Running `dirsearch` in kali linux requires us to clone the GitHub repo and run the executable from there using `python dirsearch.py -u http://10.10.11.8:5000`. 
+
+![run-dirsearch](/images/run-dirsearch.png)
+
+Running `dirsearch` resulted in the following routes being exposed:
+* /support
+* /dashboard
+
 ## Attacking The Machine
 
 ### Identifying An Avenue
@@ -101,6 +111,8 @@ Next we tried to url encode the string.
 %3Cscript%20type%3D%E2%80%99text%2Fjavascript%E2%80%99%3Ealert%28%E2%80%98test%E2%80%99%29%3B%3C%2Fscript%3E
 ```
 
-However this resulted in the same hacking detected attempt message. We could not find any source files in the dev tools so that means that the sanitization must be happening on the server. This is already more advanced than natas so we will have to find a more advanced way to inject code.
+However this resulted in the same hacking detected attempt message. We could not find any source files in the dev tools so that means that the sanitization must be happening on the server and we don't know of any queries in the url so we can't blindly try to inject there for now. This is already more advanced than natas so we will have to find a more advanced way to inject code.
+
+One thing we tried was changing the bytes in the cookie to read `admin` instead of `user`, changing the cookie to `ImFkbWluIi64CWZeVO+by/KKGM1o8Nae8F9aZnM=`. We then realized we have no way of knowing if that worked right now but it might be good to hold onto that value for when we run into an admin page. It likely won't be valid since we would assume that the cookie is calculated in a more complex way, but it is worth trying. We then remembered that our [dirsearch](#dirsearch) yielded a route called `/dashboard` with a `401 unauthorized` return status. This means that this page would be what we want to target when we have the admin cookie.
 
 
