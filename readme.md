@@ -214,6 +214,34 @@ After a good hour of trying different things, mainly many different attempts to 
 
 ![reverse-shell](/images/reverse-shell.png)
 
+#### Elevating Privilege
+
+When trying to elevate privileges, it's always good to go ahead and see what privileges the user does have. We can do this with `sudo -l`.
+
+![sudo-l](/images/sudo-l.png)
+
+What this tells us is that the file `usr/bin/syscheck` can be run with root privileges. Let's check and see what that file does.
+
+![syscheck](/images/syscheck.png)
+
+When we run this command with `sudo` we get the `Database service is not running. Starting it ...` output. It then tries to run the file `initdb.sh`. But there is one major issue here ... the file does not exist making it like some sort of _headless_ script call :D. What if we just created that file and put whatever we wanted in there? Hopefully you, like us, can see the end in sight.
+
+![initdb-sh](/images/initdb-sh.png)
+
+What we did here was put a command into `initdb.sh` that changes the permissions of `/bin/bash` such that anyone can run it. Since the `syscheck` script doesn't define an absolute path, we are able to just create the file in our home directory and have it be run with sudo privileges. Now that the `SUID` bit of the bash file is set with `user`, when we try to run `/bin/bash` it should allow us to run it with the privileges of the owner, which would be root.
+
+![become-root](/images/become-root.png)
+
+Using the `-p` flag here is very important as that tells the file to run with privileges. And now that we are root we can just snag the root flag.
+
+![root-flag](/images/root-flag.png)
+
+And done! With the root flag being `535d3d8f64a9b629f7f9c80400d4b316`, we have successfully pwned headless!!!
+
+![pwned](/images/pwned.png)
+
+
+
 
 
 
